@@ -2,7 +2,7 @@
   "name": "ShowChoirGoCardless",
   "version": "1.0.0",
   "description": "Handle webhooks",
-  "main": "app.js",
+  "main": "dist/server.js",
   "scripts": {
     "debug": "ndb server.js",
     "dev": "tsc -w & nodemon -q -w dist dist/server.js",

@@ -1,5 +1,5 @@
 const express = require("express");
-const xss = require("xss");
+//const xss = require("xss");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -7,6 +7,7 @@ const hpp = require("hpp");
 const morgan = require("morgan");
 const cors = require("cors");
 import { Request, Response, NextFunction } from "express";
+const Members = require("./models/member");
 //const globalErrorHandler = require('./controllers/errorContorller');
 //const AppError = require('./utils/appError');
 
@@ -72,11 +73,11 @@ app.use("/api", limiter);
 // TEST MIDDLEWARE //
 // will run on all requests after this code or
 // that do not end the request cycle
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.get("/", async (req: Request, res: Response, next: NextFunction) => {
   // do something here
-  console.log("SERVER RUNNING");
-  // must use next to move code on
-  res.status(200).json("Hello from express");
+
+const members = await Members.find({})	
+  res.status(200).json(members);
   next();
 });
 
