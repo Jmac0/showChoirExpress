@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 //const xss = require("xss");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
 const morgan = require("morgan");
@@ -12,16 +12,12 @@ const Members = require("./models/member");
 //const AppError = require('./utils/appError');
 
 // import routers and handler functions
-// const tourRouter = require('./routes/tourRoutes');
-// const userRouter = require('./routes/userRoutes');
-// const reviewRouter = require('./routes/reviewRoutes');
+const goCardlessRouter = require("./routers/goCardlessRouter");
 ///////////////////////////////////////////////////////////////
 const app = express();
 /////////////////GLOBAL MIDDLEWARE ///////////////////////////
-// app.use imports middleware
 
-// Body parser, read
-// ing data from body into req.body //
+// Body parser, reading data from body into req.body //
 app.use(
   express.json({
     // limit size of body request
@@ -30,11 +26,11 @@ app.use(
 );
 
 // Data sanitization against NoSQL query injection
-// app.use(mongoSanitize());
+app.use(mongoSanitize());
 // Data sanitization against XSS attacks
 //app.use(xss());
 // protect against HTTP Parameter Pollution attacks
-// without whitelist will only sort with the last parameter in the query string
+// without white list will only sort with the last parameter in the query string
 app.use(
   hpp({
     whitelist: [
@@ -73,21 +69,21 @@ app.use("/api", limiter);
 // TEST MIDDLEWARE //
 // will run on all requests after this code or
 // that do not end the request cycle
-app.get("/", async (req: Request, res: Response, next: NextFunction) => {
-  // do something here
+// app.get("/", async (req: Request, res: Response, next: NextFunction) => {
+//   // do something here
+//
+//   res.status(200).json({ mesage: "Hello from Express" });
+//   next();
+// });
+//
+////////////////// Mount our Routers ////////////////////////
+// handle incoming webhook from GoCardless
+app.use("/api/gcwebhooks", goCardlessRouter);
 
-const members = await Members.find({})	
-  res.status(200).json(members);
-  next();
-});
+////////////////// Handle all undefined routes * /////////////////////
+// Handling undefined routes with "*" and .all for all methods
+// this must be after all the possible rout handlers as they are matched in order
 
-// Mount our Routers, any error will drop to globalErrorHandler
-// app.use('/api/v1/tours', tourRouter);
-// app.use('/api/v1/users', userRouter);
-// app.use('/api/v1/reviews', reviewRouter);
-// Handling undefined routes * is all urls and .all is get post etc
-// this must be after all the possible rout handlers as they are matched
-// in order
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   // Create a new err instance and pass it to next() //
   /*  const err = new Error();
@@ -98,6 +94,7 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
   //Express will then exit the normal flow and jump to the error handler
   */
   //  next(new AppError(`Can't find ${req.url} on this server!`, 400));
+  res.status(404).json({ message: "Not Found" });
 });
 
 //////////////////////ERROR MIDDLEWARE///////////////////////
@@ -111,4 +108,4 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
 
 ///////////////////// export app to  server.js ///////////////////////
 
-module.exports = app;
+export default app;

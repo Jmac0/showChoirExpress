@@ -1,7 +1,5 @@
-const mongoose = require("mongoose");
-//this only needs to be done once and is then available
-//in every file !! Must be declared before app is required
-const dotenv = require("dotenv");
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
 // point to our config.env file
 dotenv.config({ path: "./.env.local" });
@@ -14,7 +12,7 @@ process.on("uncaughtException", (err) => {
 });
 
 // import our app which is an instance of express
-const app = require("./app");
+import app from "./app";
 
 //connect to DB
 //assign our database connection url from mongo to a var and insert password
@@ -24,8 +22,6 @@ const DB = process.env.MONGODB_URI!.replace(
 ) as string;
 mongoose
   .connect(DB, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
   })
   .then(() => {
     console.log("DB connections successful");
