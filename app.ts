@@ -1,11 +1,12 @@
-const express = require('express');
-const xss = require("xss")
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
-const hpp = require('hpp');
-const morgan = require('morgan');
-const cors = require('cors');
+const express = require("express");
+const xss = require("xss");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+const hpp = require("hpp");
+const morgan = require("morgan");
+const cors = require("cors");
+import { Request, Response, NextFunction } from "express";
 //const globalErrorHandler = require('./controllers/errorContorller');
 //const AppError = require('./utils/appError');
 
@@ -23,7 +24,7 @@ const app = express();
 app.use(
   express.json({
     // limit size of body request
-    limit: '10kb',
+    limit: "10kb",
   })
 );
 
@@ -36,11 +37,11 @@ app.use(
 app.use(
   hpp({
     whitelist: [
-      'ratingAverage',
-      'duration',
-      'difficulty',
-      'price',
-      'maxGroupSize',
+      "ratingAverage",
+      "duration",
+      "difficulty",
+      "price",
+      "maxGroupSize",
     ],
   })
 );
@@ -51,30 +52,31 @@ app.use(helmet());
 //Set Cross origin policy
 app.use(cors());
 // Development Logging
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   // morgan is a logger function
-  app.use(morgan('dev'));
+  app.use(morgan("dev"));
 }
 
 // Set rate limiter //
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 60 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again after an hour',
+  message: "Too many requests from this IP, please try again after an hour",
 });
 
 //  apply to all requests to routs that include /api
-app.use('/api', limiter);
+app.use("/api", limiter);
 
 // Helmet
 
 // TEST MIDDLEWARE //
 // will run on all requests after this code or
 // that do not end the request cycle
-app.get("/",(req, res, next) => {
+app.get("/", (req: Request, res: Response, next: NextFunction) => {
   // do something here
- console.log("SERVER RUNNING")
+  console.log("SERVER RUNNING");
   // must use next to move code on
+  res.status(200).json("Hello from express");
   next();
 });
 
@@ -85,7 +87,7 @@ app.get("/",(req, res, next) => {
 // Handling undefined routes * is all urls and .all is get post etc
 // this must be after all the possible rout handlers as they are matched
 // in order
-app.all('*', (req, res, next) => {
+app.all("*", (req: Request, res: Response, next: NextFunction) => {
   // Create a new err instance and pass it to next() //
   /*  const err = new Error();
   err.status = 'fail';
@@ -94,7 +96,7 @@ app.all('*', (req, res, next) => {
   // if next ever has an argument it is always an error
   //Express will then exit the normal flow and jump to the error handler
   */
-//  next(new AppError(`Can't find ${req.url} on this server!`, 400));
+  //  next(new AppError(`Can't find ${req.url} on this server!`, 400));
 });
 
 //////////////////////ERROR MIDDLEWARE///////////////////////
@@ -109,4 +111,3 @@ app.all('*', (req, res, next) => {
 ///////////////////// export app to  server.js ///////////////////////
 
 module.exports = app;
-

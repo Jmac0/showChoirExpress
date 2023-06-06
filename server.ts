@@ -22,7 +22,6 @@ const app = require('./app');
 //const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.PASSWORD);
 // mongoose
 //   .connect(DB, {
-//     // Not sure why this is needed
 //     useUnifiedTopology: true,
 //     useNewUrlParser: true,
 //     useCreateIndex: true,
@@ -39,10 +38,10 @@ const server = app.listen(port, () => {
 });
 
 // will catch all unhandled async exceptions and errors //
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', (err: {name: string, message: string}) => {
   console.log(err.name, err.message);
 
-  console.log('UNHANDLED REJECTION 💥 Shutting down...');
+  console.log('UNHANDLED REJECTION 💥 Shutting down');
   // shut down node app
   // gracefull shutdown
   server.close(() => {
