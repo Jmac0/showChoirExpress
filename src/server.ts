@@ -11,7 +11,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-// import our app which is an instance of express
+// import our app which is an instance of expressimport
 import app from "./app";
 
 //connect to DB
@@ -29,9 +29,9 @@ mongoose
 
 // start server, this is now the entry point of our app
 const port = process.env.PORT;
-const server = app.listen(port, () => {
+ const server = app.listen(port, () => {
   console.log("Server Started On PORT", process.env.PORT);
-});
+ });
 
 // will catch all unhandled async exceptions and errors //
 process.on("unhandledRejection", (err: { name: string; message: string }) => {
@@ -40,7 +40,7 @@ process.on("unhandledRejection", (err: { name: string; message: string }) => {
   console.log("UNHANDLED REJECTION 💥 Shutting down");
   // shut down node app
   // gracefull shutdown
-  server.close(() => {
-    process.exit(1);
-  });
+  // server.close(() => {
+  //   process.exit(1);
+  // });
 });

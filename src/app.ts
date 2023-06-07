@@ -1,4 +1,5 @@
 import express from "express";
+const bodyParser = require('body-parser')
 //const xss = require("xss");
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -16,12 +17,13 @@ const goCardlessRouter = require("./routers/goCardlessRouter");
 ///////////////////////////////////////////////////////////////
 const app = express();
 /////////////////GLOBAL MIDDLEWARE ///////////////////////////
-
+// parse incoming body of Content-Type of application/json to return it as a plain string which needs to be passed into the webhooks.parse method
+app.use(bodyParser.text({type: 'application/json'}));
 // Body parser, reading data from body into req.body //
 app.use(
   express.json({
     // limit size of body request
-    limit: "10kb",
+    limit: "100kb",
   })
 );
 
@@ -34,11 +36,6 @@ app.use(mongoSanitize());
 app.use(
   hpp({
     whitelist: [
-      "ratingAverage",
-      "duration",
-      "difficulty",
-      "price",
-      "maxGroupSize",
     ],
   })
 );
