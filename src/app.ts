@@ -1,5 +1,5 @@
 import express from "express";
-const bodyParser = require('body-parser')
+const bodyParser = require("body-parser");
 //const xss = require("xss");
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -18,7 +18,8 @@ const goCardlessRouter = require("./routers/goCardlessRouter");
 const app = express();
 /////////////////GLOBAL MIDDLEWARE ///////////////////////////
 // parse incoming body of Content-Type of application/json to return it as a plain string which needs to be passed into the webhooks.parse method
-app.use(bodyParser.text({type: 'application/json'}));
+
+//bodyParser.json({ type: "application/json" }),
 // Body parser, reading data from body into req.body //
 app.use(
   express.json({
@@ -35,8 +36,7 @@ app.use(mongoSanitize());
 // without white list will only sort with the last parameter in the query string
 app.use(
   hpp({
-    whitelist: [
-    ],
+    whitelist: [],
   })
 );
 // serve static files
@@ -63,17 +63,7 @@ app.use("/api", limiter);
 
 // Helmet
 
-// TEST MIDDLEWARE //
-// will run on all requests after this code or
-// that do not end the request cycle
-// app.get("/", async (req: Request, res: Response, next: NextFunction) => {
-//   // do something here
-//
-//   res.status(200).json({ mesage: "Hello from Express" });
-//   next();
-// });
-//
-////////////////// Mount our Routers ////////////////////////
+////////////////// Mount Routers ////////////////////////
 // handle incoming webhook from GoCardless
 app.use("/api/gcwebhooks", goCardlessRouter);
 
@@ -97,12 +87,10 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
 //////////////////////ERROR MIDDLEWARE///////////////////////
 ////////////////////////////////////////////////////////////
 
-//This is now the Express built in error handler
+//This will be the Express built in error handler
 //app.use(globalErrorHandler);
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
-
-///////////////////// export app to  server.js ///////////////////////
 
 export default app;
