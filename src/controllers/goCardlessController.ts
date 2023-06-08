@@ -8,16 +8,16 @@ const Member = require("../models/member");
 const webhooks = require("gocardless-nodejs/webhooks");
 const constants = require("gocardless-nodejs/constants");
 const gocardless = require("gocardless-nodejs");
-const client = gocardless(
-  process.env.GO_CARDLESS_ACCESS_TOKEN,
-  constants.Environments.Sandbox
-);
+const GcAccesToken = process.env.GO_CARDLESS_ACCESS_TOKEN as string;
+const webhookEndpointSecret = process.env.GC_WEBHOOK_SECRET as string;
+// Check .env variables are loaded
+if (!GcAccesToken || !webhookEndpointSecret) {
+  console.log("Not all .env variables are loaded ‼️ ");
+}
+const client = gocardless(GcAccesToken, constants.Environments.Sandbox);
 
-// Set of actions to call pro with 
-const webhookActionNames = new Set(['created', 'fulfilled', 'cancelled'])
-
-
-const webhookEndpointSecret = process.env.GC_WEBHOOK_SECRET;
+// Set of actions to call pro with
+const webhookActionNames = new Set(["created", "fulfilled", "cancelled"]);
 
 const processEvents = async (event: MandateType) => {
   // date-fns date string
