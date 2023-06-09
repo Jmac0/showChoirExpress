@@ -1,4 +1,3 @@
-const express = require("express");
 
 import { Request, Response } from "express";
 import { format } from "date-fns";
@@ -16,7 +15,7 @@ if (!GcAccesToken || !webhookEndpointSecret) {
 }
 const client = gocardless(GcAccesToken, constants.Environments.Sandbox);
 
-// Set of actions to call pro with
+// Set of actions to call processEvents with
 const webhookActionNames = new Set(["created", "fulfilled", "cancelled"]);
 
 const processEvents = async (event: MandateType) => {

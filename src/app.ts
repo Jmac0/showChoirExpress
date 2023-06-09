@@ -61,8 +61,10 @@ const limiter = rateLimit({
 //  apply to all requests to routs that include /api
 app.use("/api", limiter);
 
-// Helmet
-
+// Return 200 for "/" route to fix AWS warning
+app.use("/", (req, res, next) => {
+  res.status(200).json({ message: "App running successfully" });
+});
 ////////////////// Mount Routers ////////////////////////
 // handle incoming webhook from GoCardless
 app.use("/api/gcwebhooks", goCardlessRouter);
