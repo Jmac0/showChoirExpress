@@ -19,14 +19,7 @@ const app = express();
 /////////////////GLOBAL MIDDLEWARE ///////////////////////////
 // parse incoming body of Content-Type of application/json to return it as a plain string which needs to be passed into the webhooks.parse method
 
-//bodyParser.json({ type: "application/json" }),
 // Body parser, reading data from body into req.body //
-app.use(
-  express.json({
-    // limit size of body request
-    limit: "100kb",
-  })
-);
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -51,15 +44,8 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-// Set rate limiter //
-const limiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 60 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again after an hour",
-});
-
-//  apply to all requests to routs that include /api
-app.use("/api", limiter);
+app.use(bodyParser.text({type: 'application/json'}));
+app.use("/api/gcwebhooks", goCardlessRouter);
 
 // Return 200 for "/" route to fix AWS warning
 app.use("/", (req, res, next) => {
@@ -67,7 +53,6 @@ app.use("/", (req, res, next) => {
 });
 ////////////////// Mount Routers ////////////////////////
 // handle incoming webhook from GoCardless
-app.use("/api/gcwebhooks", goCardlessRouter);
 
 ////////////////// Handle all undefined routes * /////////////////////
 // Handling undefined routes with "*" and .all for all methods

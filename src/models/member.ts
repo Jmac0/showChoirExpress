@@ -42,5 +42,6 @@ export const memberSchema = new mongoose.Schema<MemberType>({
   direct_debit_cancelled: String,
 });
 // string must match collection name
-module.exports =
-  mongoose.models.Members || mongoose.model("Members", memberSchema);
+const Member = mongoose.model('members', memberSchema);
+
+module.exports = Member;

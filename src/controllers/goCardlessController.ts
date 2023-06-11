@@ -1,14 +1,14 @@
-
-import { Request, Response } from "express";
+import e, { Request, Response, NextFunction } from "express";
 import { format } from "date-fns";
 import { MandateType } from "../types";
 
-const Member = require("../models/member");
+const Member = require('../models/member');
 const webhooks = require("gocardless-nodejs/webhooks");
 const constants = require("gocardless-nodejs/constants");
 const gocardless = require("gocardless-nodejs");
 const GcAccesToken = process.env.GO_CARDLESS_ACCESS_TOKEN as string;
 const webhookEndpointSecret = process.env.GC_WEBHOOK_SECRET as string;
+
 // Check .env variables are loaded
 if (!GcAccesToken || !webhookEndpointSecret) {
   console.log("Not all .env variables are loaded ‼️ ");
@@ -16,9 +16,15 @@ if (!GcAccesToken || !webhookEndpointSecret) {
 const client = gocardless(GcAccesToken, constants.Environments.Sandbox);
 
 // Set of actions to call processEvents with
-const webhookActionNames = new Set(["created", "fulfilled", "cancelled"]);
+const webhookActionNames = new Set(["fulfilled"]);
+
+const updateDB = async (email: string): Promise<void> => {
+  const mongoCustomer = await Member.find({ email: email });
+  console.log("mongoCustomer", mongoCustomer);
+};
 
 const processEvents = async (event: MandateType) => {
+  console.log("PROCESSEVENTS", event.action);
   // date-fns date string
   const currentDate = format(new Date(), "dd/MM/yyyy");
   // event action string from Gocardless webhook event
@@ -48,16 +54,8 @@ const processEvents = async (event: MandateType) => {
       // Once the subscription has been setup, 'fulfilled' will be sent from Gocardless and then we can
       // update the customer record in the DB
       const customer = await client.customers.find(event.links.customer);
-      await Member.findOneAndUpdate(
-        { email: `${customer.email}` },
-        {
-          active_mandate: true,
-          direct_debit_started: currentDate,
-          mandate: event.links.mandate_request_mandate,
-          go_cardless_id: event.links.customer,
-        }
-      ).catch((err: any) => console.log("Created DB ERROR:", err));
-
+      console.log(customer)
+await  updateDB(customer.email)
       break;
     //** handle canceled mandate **//
     case "cancelled":
@@ -90,13 +88,17 @@ const processEvents = async (event: MandateType) => {
 };
 // Handle the coming Webhook and check its signature, this is from  from Gocardless docs.
 
-exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
-  // get raw body as string
-  const body = req.body;
+exports.goCardlessWebhookHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const eventsRequestBody = req.body;
   // get signature from headers
-  const signature = req.headers["webhook-signature"];
+  const signatureHeader = req.headers["webhook-signature"];
+
   // Handle the coming Webhook and check its signature, this is from  from Gocardless docs.
-  const parseEvents = (
+  /*const parseEvents = (
     eventsRequestBody: any,
     signatureHeader: any // From webhook header
   ) => {
@@ -113,14 +115,14 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
     }
   };
   // check signature and if ok return array of events
-  const checkSignature = parseEvents(body, signature);
-  //  if array pass to event handler function
-  checkSignature &&
-    checkSignature.map((event: MandateType) => {
+  const checkSignature = parseEvents(eventsRequestBody, signatureHeader);
+  //  if array pass to event handler function*/
+const body = JSON.parse(req.body);
+    body.events.map(async (event: MandateType) => {
       if (webhookActionNames.has(event.action)) {
-        processEvents(event);
+        await processEvents(event);
       }
     });
 
-  res.status(200).json("Hello from GoCardless");
+  res.status(200).json('hello from GC webhooks')
 };
