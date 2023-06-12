@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-import-module-exports
 import mongoose from "mongoose";
-
+mongoose.set('debug', true)
 // Type for new customer database entry
 export type MemberType = {
   direct_debit_started?: string;
@@ -11,6 +11,7 @@ export type MemberType = {
   go_cardless_id: string;
   first_name: string;
   last_name: string;
+  test: string;
   phone_number: number;
   post_code: string;
   street_address: string;
@@ -36,12 +37,13 @@ export const memberSchema = new mongoose.Schema<MemberType>({
   consent: Boolean,
   active_mandate: Boolean,
   mandate: String,
+  test: String,
   membership_type: String,
   go_cardless_id: String,
   direct_debit_started: String,
   direct_debit_cancelled: String,
 });
 // string must match collection name
-const Member = mongoose.model('members', memberSchema);
+const Member = mongoose.model('Member', memberSchema);
 
 module.exports = Member;

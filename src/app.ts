@@ -44,7 +44,9 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-app.use(bodyParser.text({type: 'application/json'}));
+app.use(express.text({type: "application/json"}));
+
+
 app.use("/api/gcwebhooks", goCardlessRouter);
 
 // Return 200 for "/" route to fix AWS warning
