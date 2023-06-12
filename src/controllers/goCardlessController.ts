@@ -74,15 +74,16 @@ const processEvents = async (event: MandateType) => {
         // // query Go Cardless for the actual customer details
         const canceledCustomer = await client.customers.find(Id);
 
-        await Member.findOneAndUpdate(
-          { email: `${canceledCustomer.email}` },
+        const canceledCustomerRecord = await Member.findOneAndUpdate(
+          { email: canceledCustomer.email },
           {
             active_mandate: false,
             mandate: "",
             go_cardless_id: "",
             direct_debit_cancelled: currentDate,
           }
-        ).catch((err: any) => {
+        );
+        await canceledCustomerRecord.save().catch((err: any) => {
           console.log(err);
         });
       }
@@ -102,7 +103,6 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
 
   // Handle the coming Webhook and check its signature, this is from
   // Gocardless docs.
-  /*
   const parseEvents = (
     eventsRequestBody: any,
     signatureHeader: any // From webhook header
@@ -119,12 +119,10 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
       }
     }
   };
-*/
   // check signature and if OK return an array of events
-  //const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
+  const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
   //  if there is an array pass to event handler function*/
-  const body = JSON.parse(req.body);
-  body.events.map(async (event: MandateType) => {
+  eventsArray.map(async (event: MandateType) => {
     if (webhookActionNames.has(event.action)) {
       await processEvents(event);
     }
