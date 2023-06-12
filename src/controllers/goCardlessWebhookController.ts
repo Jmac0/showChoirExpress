@@ -49,17 +49,15 @@ const processEvents = async (event: MandateType) => {
       // sent from Gocardless, and then we can
       // update the customer record in the DB
       const customer = await client.customers.find(event.links.customer);
-
-      const mongoCustomer = await Member.findOneAndUpdate(
+      console.log("GC CUSTOMER", customer);
+      const returnedCustomer = await Member.findOneAndUpdate(
         { email: customer.email },
         {
-          go_cardless_id: event.links.customer,
           active_mandate: true,
-          mandate: event.links.mandate_request_mandate,
-        },
-        { new: true }
+          go_cardless_id: customer.id,
+        }
       );
-      await mongoCustomer.save();
+      console.log("MONGO RESULT", returnedCustomer);
       break;
     //** handle canceled mandate **//
     case "cancelled":
@@ -100,9 +98,8 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
   // get signature from headers
   const signatureHeader = req.headers["webhook-signature"];
 
-  // Handle the coming Webhook and check its signature, this is from
+  // Handle the incoming Webhook and check its signature, this is from
   // Gocardless docs.
-  /*
   const parseEvents = (
     eventsRequestBody: any,
     signatureHeader: any // From webhook header
@@ -119,12 +116,11 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
       }
     }
   };
-*/
   // check signature and if OK return an array of events
-  //const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
+  const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
   //  if there is an array pass to event handler function*/
-  const body = JSON.parse(req.body);
-  body.events.map(async (event: MandateType) => {
+//const tempBody = JSON.parse(req.body)
+  eventsArray.map(async (event: MandateType) => {
     if (webhookActionNames.has(event.action)) {
       await processEvents(event);
     }
