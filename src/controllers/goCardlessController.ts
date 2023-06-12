@@ -50,7 +50,7 @@ const processEvents = async (event: MandateType) => {
       // update the customer record in the DB
       const customer = await client.customers.find(event.links.customer);
 
-      const mongoCustomer = await Member.findOneAndUpdate(
+      await Member.findOneAndUpdate(
         { email: customer.email },
         {
           go_cardless_id: event.links.customer,
@@ -59,7 +59,6 @@ const processEvents = async (event: MandateType) => {
         },
         { new: true }
       );
-      await mongoCustomer.save();
       break;
     //** handle canceled mandate **//
     case "cancelled":
@@ -74,16 +73,15 @@ const processEvents = async (event: MandateType) => {
         // // query Go Cardless for the actual customer details
         const canceledCustomer = await client.customers.find(Id);
 
-        const canceledCustomerRecord = await Member.findOneAndUpdate(
-          { email: canceledCustomer.email },
+        await Member.findOneAndUpdate(
+          { email: `${canceledCustomer.email}` },
           {
             active_mandate: false,
             mandate: "",
             go_cardless_id: "",
             direct_debit_cancelled: currentDate,
           }
-        );
-        await canceledCustomerRecord.save().catch((err: any) => {
+        ).catch((err: any) => {
           console.log(err);
         });
       }
