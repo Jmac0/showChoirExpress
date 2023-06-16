@@ -4,6 +4,7 @@
   "description": "Handle webhooks",
   "main": "dist/server.js",
   "scripts": {
+	"build": "npx tsc",
     "debug": "ndb server.js",
     "dev": "tsc -w & nodemon -q -w dist dist/server.js",
     "start": "nodemon ./dist/server.js",

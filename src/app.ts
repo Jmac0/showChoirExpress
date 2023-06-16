@@ -1,5 +1,4 @@
 import express from "express";
-const bodyParser = require("body-parser");
 //const xss = require("xss");
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -8,18 +7,12 @@ const hpp = require("hpp");
 const morgan = require("morgan");
 const cors = require("cors");
 import { Request, Response, NextFunction } from "express";
-const Members = require("./models/member");
 //const globalErrorHandler = require('./controllers/errorContorller');
 //const AppError = require('./utils/appError');
 
-// import routers and handler functions
 const goCardlessRouter = require("./routers/goCardlessRouter");
 ///////////////////////////////////////////////////////////////
 const app = express();
-/////////////////GLOBAL MIDDLEWARE ///////////////////////////
-// parse incoming body of Content-Type of application/json to return it as a plain string which needs to be passed into the webhooks.parse method
-
-// Body parser, reading data from body into req.body //
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -44,10 +37,8 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-app.use(express.text({type: "application/json"}));
-
-
-app.use("/api/gcwebhooks", goCardlessRouter);
+//app.use(express.text({type: "application/json"}));
+app.use("/api/gocardless", goCardlessRouter);
 
 // Return 200 for "/" route to fix AWS warning
 app.use("/", (req, res, next) => {
