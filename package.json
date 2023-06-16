@@ -7,8 +7,8 @@
 	"build": "npx tsc",
     "debug": "ndb server.js",
     "dev": "tsc -w & nodemon -q -w dist dist/server.js",
-    "start": "nodemon ./dist/server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js"
+    "start": "./dist/server.js",
+    "start:prod": "NODE_ENV=production server.js"
   },
   "author": "Jamie Mac",
   "license": "ISC",
