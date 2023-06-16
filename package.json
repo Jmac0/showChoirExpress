@@ -8,7 +8,6 @@
     "debug": "ndb server.js",
     "dev": "tsc -w & nodemon -q -w dist dist/server.js",
     "start": "dist/server.js",
-	"postinstall": "tsc",
     "start:prod": "NODE_ENV=production nodemon server.js",
   },
   "author": "Jamie Mac",
