@@ -12,6 +12,7 @@ const webhookEndpointSecret = process.env.GC_WEBHOOK_SECRET as string;
 
 // Check .env.local variables are loaded
 if (!GcAccessToken || !webhookEndpointSecret) {
+  // eslint-disable-next-line no-console
   console.log('Not all .env.local variables are loaded ‼️ ');
 }
 const client = gocardless(GcAccessToken, constants.Environments.Sandbox);
@@ -97,34 +98,38 @@ const processEvents = async (event: MandateType) => {
 // Gocardless docs.
 
 exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
-  const eventsRequestBody = req.body;
-  // get signature from headers
-  const signatureHeader = req.headers['webhook-signature'];
-
-  // Handle the incoming Webhook and check its signature, this is from
-  // Gocardless docs.
-  const parseEvents = (
-    requestBody: any,
-    header: any, // From webhook header
-    // eslint-disable-next-line consistent-return
-  ) => {
-    try {
-      return webhooks.parse(requestBody, webhookEndpointSecret, header);
-    } catch (error) {
-      if (error instanceof webhooks.InvalidSignatureError) {
-        console.log('invalid signature, look out!');
+  try {
+    const eventsRequestBody = req.body;
+    // get signature from headers
+    const signatureHeader = req.headers['webhook-signature'];
+    console.log('Header', req.headers);
+    // Handle the incoming Webhook and check its signature, this is from
+    // Gocardless docs.
+    const parseEvents = (
+      requestBody: any,
+      header: any, // From webhook header
+      // eslint-disable-next-line consistent-return
+    ) => {
+      try {
+        return webhooks.parse(requestBody, webhookEndpointSecret, header);
+      } catch (error) {
+        if (error instanceof webhooks.InvalidSignatureError) {
+          console.log('invalid signature, look out!');
+        }
       }
-    }
-  };
-  // check signature and if OK return an array of events
-  const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
-  //  if there is an array pass to event handler function*/
+    };
+    // check signature and if OK return an array of events
+    const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
+    //  if there is an array pass to event handler function*/
 
-  eventsArray.map(async (event: MandateType) => {
-    if (webhookActionNames.has(event.action)) {
-      await processEvents(event);
-    }
-  });
-
-  res.status(200).json('hello from GC webhooks');
+    eventsArray.map(async (event: MandateType) => {
+      if (webhookActionNames.has(event.action)) {
+        await processEvents(event);
+      }
+    });
+    res.status(200);
+  } catch (err: any) {
+    const message = err.toString();
+    res.status(403).json({ message });
+  }
 };

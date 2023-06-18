@@ -34,7 +34,6 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
     res
       .status(401)
       .json({ message: 'Please use a valid UK, EU or US email address' });
-    return;
   }
 
   const createMandateRequestURL = async () => {
@@ -89,7 +88,7 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   // this runs first adding new customer info to the database or updating
   // an existing customer
   await Member.create(newMemberData)
-    .then(() => createMandateRequestURL())
+    .then(createMandateRequestURL())
     .catch((err: any) => {
       console.log('ERROR SAVING DOCUMENT', err);
     });
