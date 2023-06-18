@@ -51,11 +51,6 @@ if (process.env.NODE_ENV !== 'production') {
 // app.use(express.text({type: "application/json"}));
 app.use('/api/gocardless', goCardlessRouter);
 
-// Return 200 for "/" route to fix AWS warning
-app.use('/', (req, res) => {
-  res.status(200).json({ message: 'App running successfully' });
-});
-
 /// /////////////// Handle all undefined routes * /////////////////////
 // Handling undefined routes with "*" and .all for all methods
 // this must be after all the possible rout handlers as they are matched
@@ -75,6 +70,10 @@ app.all('*', (req: Request, res: Response) => {
   res.status(404).json({ message: 'Not Found' });
 });
 
+// Return 200 for "/" route to fix AWS warning
+app.use('/', (req, res) => {
+  res.status(200).json({ message: 'Hello Peeps' });
+});
 /// ///////////////////ERROR MIDDLEWARE///////////////////////
 /// /////////////////////////////////////////////////////////
 

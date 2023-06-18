@@ -1,8 +1,9 @@
-/* eslint-disable import/first */
+/* eslint-disable import/first  */
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: './.env.local' });
+import config from 'config';
 
 import app from './app';
 
@@ -23,8 +24,8 @@ mongoose.connect(DB, {}).then(() => {
 });
 
 // start server, this is now the entry point of our app
-const port = process.env.PORT;
-app.listen(port, () => {
+const port = config.get<number>('port');
+const server = app.listen(port, () => {
   console.log('Server Started On PORT', process.env.PORT);
 });
 
@@ -33,9 +34,8 @@ process.on('unhandledRejection', (err: { name: string; message: string }) => {
   console.log(err.name, err.message);
 
   console.log('UNHANDLED REJECTION 💥 Shutting down');
-  // shut-down node app
   // gracefully shutdown
-  // server.close(() => {
-  // process.exit(1);
-  // });
+  server.close(() => {
+    process.exit(1);
+  });
 });
