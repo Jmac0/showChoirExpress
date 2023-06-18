@@ -1,12 +1,13 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-const gocardless = require("gocardless-nodejs");
-const constants = require("gocardless-nodejs/constants");
+const gocardless = require('gocardless-nodejs');
+const constants = require('gocardless-nodejs/constants');
 
-const Member = require("../models/member");
+const Member = require('../models/member');
+
 const client = gocardless(
   process.env.GO_CARDLESS_ACCESS_TOKEN,
-  constants.Environments.Sandbox
+  constants.Environments.Sandbox,
 );
 exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   const {
@@ -14,7 +15,7 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
     lastName,
     address,
     city,
-	email,
+    email,
     county,
     postCode,
     phoneNumber,
@@ -25,7 +26,6 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
     consent,
   } = req.body;
 
-
   const parsedEmail = email.toLowerCase().trim();
   // check for spam .ru emails
   const pattern = /.ru$/;
@@ -33,7 +33,7 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   if (match) {
     res
       .status(401)
-      .json({ message: "Please use a valid UK, EU or US email address" });
+      .json({ message: 'Please use a valid UK, EU or US email address' });
     return;
   }
 
@@ -41,14 +41,13 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
     // create a billing request returns a request id string
     const { id } = await client.billingRequests.create({
       mandate_request: {
-        scheme: "bacs",
+        scheme: 'bacs',
       },
     });
     // add prefilled customer detail to the direct debit form
     const billingRequestFlow = await client.billingRequestFlows.create({
-      /* TODO add hashed email to url */
-      redirect_uri: "https://www.google.com",
-      exit_uri: "https://www.google.com",
+      redirect_uri: 'https://www.google.com',
+      exit_uri: 'https://www.google.com',
       prefilled_customer: {
         given_name: firstName,
         family_name: lastName,
@@ -82,18 +81,16 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
     home_choir: homeChoir,
     consent,
     active_mandate: false,
-    mandate: "",
-    membership_type: "DD",
-    go_cardless_id: "",
+    mandate: '',
+    membership_type: 'DD',
+    go_cardless_id: '',
   };
 
   // this runs first adding new customer info to the database or updating
   // an existing customer
   await Member.create(newMemberData)
-    .then(() => {
-      return createMandateRequestURL();
-    })
+    .then(() => createMandateRequestURL())
     .catch((err: any) => {
-      console.log("ERROR SAVING DOCUMENT", err);
+      console.log('ERROR SAVING DOCUMENT', err);
     });
 };

@@ -3,7 +3,11 @@ export type MandateType = {
   created_at: string;
   resource_type: string;
   action: string;
-  links: {customer?: string,  mandate?: string, mandate_request_mandate?: string };
+  links: {
+    customer?: string;
+    mandate?: string;
+    mandate_request_mandate?: string;
+  };
   details: {
     origin: string;
     cause: string;
@@ -11,8 +15,8 @@ export type MandateType = {
   };
 };
 export type MemberType = {
-  direct_debit_started?: string,
-  direct_debit_cancelled?: string,
+  direct_debit_started?: string;
+  direct_debit_cancelled?: string;
   active_mandate: boolean;
   mandate?: string;
   membership_type?: string | null;
