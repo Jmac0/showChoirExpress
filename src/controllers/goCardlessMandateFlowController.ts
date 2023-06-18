@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
+import config from 'config';
 
 const gocardless = require('gocardless-nodejs');
 const constants = require('gocardless-nodejs/constants');
 
 const Member = require('../models/member');
 
+const gocardlessAccessToken = config.get('goCardlessAccessToken');
 const client = gocardless(
-  process.env.GO_CARDLESS_ACCESS_TOKEN,
+  gocardlessAccessToken,
   constants.Environments.Sandbox,
 );
 exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {

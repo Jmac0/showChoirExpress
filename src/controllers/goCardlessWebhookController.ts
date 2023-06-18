@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { format } from 'date-fns';
+import config from 'config';
 import { MandateType } from '../types';
 
 const webhooks = require('gocardless-nodejs/webhooks');
@@ -7,15 +8,19 @@ const constants = require('gocardless-nodejs/constants');
 const gocardless = require('gocardless-nodejs');
 const Member = require('../models/member');
 
-const GcAccessToken = process.env.GO_CARDLESS_ACCESS_TOKEN as string;
-const webhookEndpointSecret = process.env.GC_WEBHOOK_SECRET as string;
-
+const goCardlessAccessToken = config.get<string>('goCardlessAccessToken');
+const webhookEndpointSecret = config.get<string>('goCardlessWebhookSecret');
 // Check .env.local variables are loaded
-if (!GcAccessToken || !webhookEndpointSecret) {
-  // eslint-disable-next-line no-console
-  console.log('Not all .env.local variables are loaded ‼️ ');
-}
-const client = gocardless(GcAccessToken, constants.Environments.Sandbox);
+/*
+ if (!goCardlessAccessToken || !webhookEndpointSecret) {
+ // eslint-disable-next-line no-console
+ console.log('Not all .env.local variables are loaded ‼️ ');
+ }
+ */
+const client = gocardless(
+  goCardlessAccessToken,
+  constants.Environments.Sandbox,
+);
 
 // Set of actions to call processEvents with
 const webhookActionNames = new Set(['fulfilled', 'created']);

@@ -4,13 +4,14 @@
   "description": "Handle webhooks",
   "author": "Jamie Mac",
   "license": "ISC",
-  "main": "dist/server.js",
+  "main": "dist/src/app.js",
   "scripts": {
     "build": "npx tsc",
     "debug": "ndb server.js",
-    "dev": "tsc -w & nodemon -q -w dist dist/src/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "start": "dist/server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js"
+    "test": "jest",
+    "start:prod": "NODE_ENV=production nodemon app.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -38,18 +39,23 @@
   "devDependencies": {
     "@types/config": "^3.3.0",
     "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.2",
     "@types/node": "^20.2.5",
+    "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
-    "prettier": "^2.3.2",
+    "jest": "^29.5.0",
+    "prettier": "^2.8.8",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.1.3"
   },

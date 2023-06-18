@@ -1,41 +1,72 @@
-/* eslint-disable import/first  */
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import express, { Request, Response } from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
-dotenv.config({ path: './.env.local' });
-import config from 'config';
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
+const morgan = require('morgan');
+const cors = require('cors');
+const goCardlessRouter = require('./routers/goCardlessRouter');
 
-import app from './app';
-
-process.on('uncaughtException', (err) => {
-  console.log(err.name, err.message);
-  console.log('UNCAUGHT EXCEPTION 💥 SHUTTING DOWN...');
-  process.exit(1);
-});
-// connect to DB,
-// assign our database connection url from mongo to a var
-// and insert password
-const DB = process.env.MONGODB_URI!.replace(
-  '<PASSWORD>',
-  process.env.PASSWORD!,
-) as string;
-mongoose.connect(DB, {}).then(() => {
-  console.log('DB connections successful');
+// Set rate limiter //
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 60 minutes
+  max: 200, // limit each IP to 200 requests per
+  // hour
+  // windowMs
+  message: 'Too many requests from this IP, please try again after an hour',
 });
 
-// start server, this is now the entry point of our app
-const port = config.get<number>('port');
-const server = app.listen(port, () => {
-  console.log('Server Started On PORT', process.env.PORT);
-});
+function createServer() {
+  /// ////////////////////////////////////////////////////////////
+  const app = express();
+  //  apply to all requests to routs that include /api
+  app.use('/api', limiter);
 
-// will catch all unhandled async exceptions and errors //
-process.on('unhandledRejection', (err: { name: string; message: string }) => {
-  console.log(err.name, err.message);
+  // Data sanitization against NoSQL query injection
+  app.use(mongoSanitize());
+  app.use(
+    hpp({
+      whitelist: [],
+    }),
+  );
+  // serve static files
+  app.use(express.static(`${__dirname}/public`));
+  // SET SECURITY HTTP HEADERS //
+  app.use(helmet());
+  // Set Cross origin policy
+  app.use(cors());
+  // Development Logging
+  if (process.env.NODE_ENV !== 'production') {
+    // morgan is a logger function
+    app.use(morgan('dev'));
+  }
 
-  console.log('UNHANDLED REJECTION 💥 Shutting down');
-  // gracefully shutdown
-  server.close(() => {
-    process.exit(1);
+  app.use('/api/gocardless', goCardlessRouter);
+
+  /// /////////////// Handle all undefined routes * /////////////////////
+  // this must be after all the possible rout handlers as they are matched
+  // in order
+
+  app.all('*', (req: Request, res: Response) => {
+    // Create a new error instance and pass it to next() //
+    /*  const err = new Error();
+     err.status = 'fail';
+     err.message = `Can't find ${req.url} on this server`;
+     err.statusCode = 404;
+     // if next ever has an argument it is always an error
+     //Express will then exit the normal flow
+     and jump to the error handler
+     */
+    //  next(new AppError(`Can't find ${req.url} on this server!`, 400));
+    res.status(404).json({ message: 'Not Found' });
   });
-});
+
+  // Return 200 for "/" route to fix AWS warning
+  app.use('/', (req, res) => {
+    res.status(200).json({ message: 'Hello Peeps' });
+  });
+  return app;
+}
+
+export default createServer;
