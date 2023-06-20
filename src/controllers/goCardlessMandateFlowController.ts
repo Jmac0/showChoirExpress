@@ -27,7 +27,7 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
     homeChoir,
     consent,
   } = req.body;
-
+  // trim and lower case email to get over a mongo query problem
   const parsedEmail = email.toLowerCase().trim();
   // check for spam .ru emails
   const pattern = /.ru$/;
@@ -93,5 +93,10 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
     .then(createMandateRequestURL())
     .catch((err: any) => {
       console.log('ERROR SAVING DOCUMENT', err);
+      res.status(500).json({
+        message:
+          'Oops, there seems to be a problem, please try again'
+          + ' later or give us a call',
+      });
     });
 };

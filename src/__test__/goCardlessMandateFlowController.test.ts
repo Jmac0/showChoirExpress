@@ -19,20 +19,20 @@ const newUserPayload = {
 
 const app = createServer();
 describe('Mandateflow handler ', () => {
-  it('Should return an error message when the posted email includes a .ru suffix', async () => {
-    newUserPayload.email = 'test@test.ru';
-    const { status, body } = await supertest(app).post(
-      '/api/gocardless/mandateflow',
-    ).send(newUserPayload);
-    expect(status).toBe(401);
-    expect(body.message).toBe('Please use a valid UK, EU or US email address');
-  });
-
   it('should return redirect url from goCardless ', async () => {
     const { status, body } = await supertest(app)
       .post('/api/gocardless/mandateflow')
       .send(newUserPayload);
     expect(body).toHaveProperty('authorisation_url');
     expect(status).toBe(200);
-  });
+  }, 5000);
+
+  it('Should return an error message when the posted email includes a .ru suffix', async () => {
+    newUserPayload.email = 'test@test.ru';
+    const { status, body } = await supertest(app)
+      .post('/api/gocardless/mandateflow')
+      .send(newUserPayload);
+    expect(status).toBe(401);
+    expect(body.message).toBe('Please use a valid UK, EU or US email address');
+  }, 5000);
 });
