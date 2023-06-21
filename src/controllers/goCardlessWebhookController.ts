@@ -126,4 +126,5 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
     const message = err.toString();
     res.status(403).json({ message });
   }
+  res.status(200).json({ message: 'webhook handler OK' });
 };
