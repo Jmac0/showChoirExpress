@@ -1,8 +1,10 @@
-beforeAll(() => console.log('BEFORE ALL'));
+const mongoose = require('mongoose');
+const config = require('config');
 
-/*
- afterEach(() => server.resetHandlers());
-
- // Clean up after the tests are finished.
- afterAll(() => server.close());
- */
+const mongoTestUriString = config.get('mongoTestUri');
+beforeAll(async () => {
+  await mongoose.connect(mongoTestUriString);
+});
+afterAll(async () => {
+  await mongoose.connection.close();
+});

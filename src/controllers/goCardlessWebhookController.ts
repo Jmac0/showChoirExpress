@@ -10,13 +10,6 @@ const Member = require('../models/member');
 
 const goCardlessAccessToken = config.get<string>('goCardlessAccessToken');
 const webhookEndpointSecret = config.get<string>('goCardlessWebhookSecret');
-// Check .env.local variables are loaded
-/*
- if (!goCardlessAccessToken || !webhookEndpointSecret) {
- // eslint-disable-next-line no-console
- console.log('Not all .env.local variables are loaded ‼️ ');
- }
- */
 const client = gocardless(
   goCardlessAccessToken,
   constants.Environments.Sandbox,
@@ -57,15 +50,13 @@ const processEvents = async (event: MandateType) => {
       // sent from Gocardless, and then we can
       // update the customer record in the DB
       const customer = await client.customers.find(event.links.customer);
-      console.log('GC CUSTOMER', customer);
-      const returnedCustomer = await Member.findOneAndUpdate(
+      await Member.findOneAndUpdate(
         { email: customer.email },
         {
           active_mandate: true,
           go_cardless_id: customer.id,
         },
       );
-      console.log('MONGO RESULT', returnedCustomer);
       break;
     }
     //* * handle canceled mandate **//
@@ -96,7 +87,6 @@ const processEvents = async (event: MandateType) => {
       break;
     }
     default:
-      console.log(event);
   }
 };
 // Handle the coming Webhook and check its signature, this is from
@@ -107,7 +97,6 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
     const eventsRequestBody = req.body;
     // get signature from headers
     const signatureHeader = req.headers['webhook-signature'];
-    console.log('Header', req.headers);
     // Handle the incoming Webhook and check its signature, this is from
     // Gocardless docs.
     const parseEvents = (

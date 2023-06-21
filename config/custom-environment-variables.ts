@@ -6,5 +6,6 @@ export default {
   mongoUri: 'MONGODB_URI',
   password: 'PASSWORD',
   goCardlessAccessToken: 'GO_CARDLESS_ACCESS_TOKEN',
-  goCardlessWebhookSecret: 'GO_CARDLESS_SECRET',
+  goCardlessWebhookSecret: 'GO_CARDLESS_WEBHOOK_SECRET',
+  mongoTestUri: 'MONGODB_TEST_URI',
 };

@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-import-module-exports
 import mongoose from 'mongoose';
 
-mongoose.set('debug', true);
+mongoose.set('debug', process.env.NODE_ENV !== 'production');
 // Type for new customer database entry
 export type MemberType = {
   direct_debit_started?: string;

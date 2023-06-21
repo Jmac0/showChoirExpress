@@ -3,7 +3,9 @@ import supertest from 'supertest';
 
 import createServer from '../server';
 
-const newUserPayload = {
+const Member = require('../models/member');
+
+const validUserPayload = {
   consent: true,
   ageConfirm: true,
   homeChoir: 'Some place',
@@ -16,23 +18,43 @@ const newUserPayload = {
   lastName: 'Smith',
   firstName: 'John',
 };
+const inValidUserPayload = {
+  consent: true,
+  ageConfirm: true,
+  homeChoir: 'Some place',
+  email: 'test@test.ru',
+  phoneNumber: '323123423443432',
+  postCode: 'ST7 1RR',
+  county: 'HomeCounty',
+  townOrCity: 'HomeTown',
+  streetAddress: '1 The Street',
+  lastName: 'Smith',
+  firstName: 'John',
+};
 
 const app = createServer();
-describe('Mandateflow handler ', () => {
-  it('should return redirect url from goCardless ', async () => {
-    const { status, body } = await supertest(app)
-      .post('/api/gocardless/mandateflow')
-      .send(newUserPayload);
-    expect(body).toHaveProperty('authorisation_url');
-    expect(status).toBe(200);
-  }, 5000);
-
+describe('MandateFlowController', () => {
   it('Should return an error message when the posted email includes a .ru suffix', async () => {
-    newUserPayload.email = 'test@test.ru';
+    // set user email to invalid suffix
     const { status, body } = await supertest(app)
       .post('/api/gocardless/mandateflow')
-      .send(newUserPayload);
+      .send(inValidUserPayload);
     expect(status).toBe(401);
     expect(body.message).toBe('Please use a valid UK, EU or US email address');
-  }, 5000);
+  });
+
+  it(
+    'should return redirect url from goCardless and save the valid'
+      + ' user data to the test database',
+    async () => {
+      const { status, body } = await supertest(app)
+        .post('/api/gocardless/mandateflow')
+        .send(validUserPayload);
+      expect(body).toHaveProperty('authorisation_url');
+      expect(status).toBe(200);
+      const userQueryArray = await Member.find({});
+      expect(userQueryArray.length).toBe(1);
+      await Member.deleteMany({});
+    },
+  );
 });

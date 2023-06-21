@@ -11,6 +11,7 @@ const client = gocardless(
   gocardlessAccessToken,
   constants.Environments.Sandbox,
 );
+// eslint-disable-next-line consistent-return
 exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   const {
     firstName,
@@ -33,7 +34,7 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   const pattern = /.ru$/;
   const match = parsedEmail.match(pattern);
   if (match) {
-    res
+    return res
       .status(401)
       .json({ message: 'Please use a valid UK, EU or US email address' });
   }
@@ -90,10 +91,11 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   // this runs first adding new customer info to the database or updating
   // an existing customer
   await Member.create(newMemberData)
-    .then(createMandateRequestURL())
+    .then(await createMandateRequestURL())
     .catch((err: any) => {
       console.log('ERROR SAVING DOCUMENT', err);
-      res.status(500).json({
+
+      return res.status(500).json({
         message:
           'Oops, there seems to be a problem, please try again'
           + ' later or give us a call',

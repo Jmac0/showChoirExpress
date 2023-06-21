@@ -14,14 +14,11 @@ const password = config.get<string>('password');
 
 const app = createServer();
 // connect to DB,
-// assign our database connection url from mongo
 const DB = mongoUri.replace('<PASSWORD>', password) as string;
 mongoose.connect(DB, {}).then(() => {
   console.log('DB connections successful');
 });
 
-// start wasServerWillBeApp, this is now the entry point of our
-// wasServerWillBeApp
 app.listen(port, () => {
   console.log('Server Started On PORT', port);
 });
