@@ -3,7 +3,7 @@ import supertest from 'supertest';
 
 import createServer from '../server';
 
-const Member = require('../models/member');
+import Member from '../models/member';
 
 const validUserPayload = {
   consent: true,

@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import { format } from 'date-fns';
 import config from 'config';
 import { MandateType } from '../types';
+import Member from '../models/member';
 
 const webhooks = require('gocardless-nodejs/webhooks');
 const constants = require('gocardless-nodejs/constants');
 const gocardless = require('gocardless-nodejs');
-const Member = require('../models/member');
 
 const goCardlessAccessToken = config.get<string>('goCardlessAccessToken');
 const webhookEndpointSecret = config.get<string>('goCardlessWebhookSecret');
@@ -92,7 +92,7 @@ const processEvents = async (event: MandateType) => {
 // Handle the coming Webhook and check its signature, this is from
 // Gocardless docs.
 
-exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
+const goCardlessWebhookHandler = async (req: Request, res: Response) => {
   try {
     const eventsRequestBody = req.body;
     // get signature from headers
@@ -128,3 +128,4 @@ exports.goCardlessWebhookHandler = async (req: Request, res: Response) => {
   }
   res.status(200).json({ message: 'webhook handler OK' });
 };
+export default goCardlessWebhookHandler;

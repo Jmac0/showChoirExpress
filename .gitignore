@@ -4,3 +4,4 @@ yarn-error.log
 .DS_Store
 tags
 node_modules/
+.idea/

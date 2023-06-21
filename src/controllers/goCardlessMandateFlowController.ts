@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import config from 'config';
 
+import Member from '../models/member';
+
 const gocardless = require('gocardless-nodejs');
 const constants = require('gocardless-nodejs/constants');
-
-const Member = require('../models/member');
 
 const gocardlessAccessToken = config.get('goCardlessAccessToken');
 const client = gocardless(
@@ -12,7 +12,7 @@ const client = gocardless(
   constants.Environments.Sandbox,
 );
 // eslint-disable-next-line consistent-return
-exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
+const goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   const {
     firstName,
     lastName,
@@ -91,7 +91,7 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   // this runs first adding new customer info to the database or updating
   // an existing customer
   await Member.create(newMemberData)
-    .then(await createMandateRequestURL())
+    .then(async () => createMandateRequestURL())
     .catch((err: any) => {
       console.log('ERROR SAVING DOCUMENT', err);
 
@@ -102,3 +102,4 @@ exports.goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
       });
     });
 };
+export default goCardlessMandateFlowHandler;

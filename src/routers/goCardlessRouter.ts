@@ -1,20 +1,20 @@
-const express = require('express');
+import express from 'express';
+import goCardlessWebhookHandler from '../controllers/goCardlessWebhookController';
+import goCardlessMandateFlowController from '../controllers/goCardlessMandateFlowController';
 
 const router = express.Router();
-const goCardlessWebhookController = require('../controllers/goCardlessWebhookController');
-const goCardlessMandateFlowController = require('../controllers/goCardlessMandateFlowController');
 // apply json body parser to this route
 router
   .route('/mandateflow')
   .post(
     express.json(),
-    goCardlessMandateFlowController.goCardlessMandateFlowHandler,
+    goCardlessMandateFlowController,
   );
 router
   .route('/webhooks')
   .post(
     express.text({ type: 'application/json' }),
-    goCardlessWebhookController.goCardlessWebhookHandler,
+    goCardlessWebhookHandler,
   );
 
 module.exports = router;

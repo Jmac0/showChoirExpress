@@ -33,3 +33,8 @@ export type MemberType = {
   home_choir: any;
   consent: boolean;
 };
+
+export interface AppErrorType extends Error {
+  statusCode: number;
+  status: string;
+}

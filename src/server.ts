@@ -1,6 +1,8 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import AppError from '../utils/appError';
+import globalErrorHandler from './controllers/errorController';
 
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
@@ -48,21 +50,15 @@ function createServer() {
   // this must be after all the possible rout handlers as they are matched
   // in order
 
-  app.all('*', (req: Request, res: Response) => {
+  app.all('*', (req: Request, res: Response, next: NextFunction) => {
     // Create a new error instance and pass it to next() //
-    /*  const err = new Error();
-     err.status = 'fail';
-     err.message = `Can't find ${req.url} on this server`;
-     err.statusCode = 404;
-     // if next ever has an argument it is always an error
-     //Express will then exit the normal flow
-     and jump to the error handler
-     */
-    //  next(new AppError(`Can't find ${req.url} on this server!`, 400));
-    res.status(404).json({ message: 'Not Found' });
+    next(
+      new AppError(`Can't find the url: ${req.originalUrl} on this server`, 404),
+    );
   });
 
-  // Return 200 for "/" route to fix AWS warning
+  app.use(globalErrorHandler);
+  //  Return 200 for "/" route to fix AWS warning
   app.use('/', (req, res) => {
     res.status(200).json({ message: 'Hello Peeps' });
   });

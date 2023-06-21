@@ -47,4 +47,4 @@ export const memberSchema = new mongoose.Schema<MemberType>({
 // string must match collection name
 const Member = mongoose.model('Member', memberSchema);
 
-module.exports = Member;
+export default Member;
