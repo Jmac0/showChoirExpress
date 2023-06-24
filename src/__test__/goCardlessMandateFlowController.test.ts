@@ -40,7 +40,9 @@ describe('MandateFlowController', () => {
       .post('/api/gocardless/mandateflow')
       .send(inValidUserPayload);
     expect(status).toBe(401);
-    expect(body.message).toBe('Please use a valid UK, EU or US email address');
+    expect(body.message).toBe(
+      'Please provide a valid UK, EU or US email address',
+    );
   });
 
   it(

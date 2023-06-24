@@ -26,21 +26,25 @@ const processEvents = async (event: MandateType) => {
     case 'created':
       // create a new subscription for the customer,
       if (event.links.mandate) {
-        await client.subscriptions.create({
-          amount: '3000',
-          currency: 'GBP',
-          name: 'single_subscription',
-          interval_unit: 'monthly',
-          day_of_month: '1',
-          metadata: {
-            order_no: 'Show_Choir_single_subscription',
-          },
-          // mandate to create
-          // subscription against
-          links: {
-            mandate: event.links.mandate,
-          },
-        });
+        await client.subscriptions
+          .create({
+            amount: '3000',
+            currency: 'GBP',
+            name: 'single_subscription',
+            interval_unit: 'monthly',
+            day_of_month: '1',
+            metadata: {
+              order_no: 'Show_Choir_single_subscription',
+            },
+            // mandate to create
+            // subscription against
+            links: {
+              mandate: event.links.mandate,
+            },
+          })
+          .catch((err: any) => {
+            throw new Error(err.message);
+          });
       }
 
       break;
@@ -93,39 +97,39 @@ const processEvents = async (event: MandateType) => {
 // Gocardless docs.
 
 const goCardlessWebhookHandler = async (req: Request, res: Response) => {
-  try {
-    const eventsRequestBody = req.body;
-    // get signature from headers
-    const signatureHeader = req.headers['webhook-signature'];
-    // Handle the incoming Webhook and check its signature, this is from
-    // Gocardless docs.
-    const parseEvents = (
-      requestBody: any,
-      header: any, // From webhook header
-      // eslint-disable-next-line consistent-return
-    ) => {
-      try {
-        return webhooks.parse(requestBody, webhookEndpointSecret, header);
-      } catch (error) {
-        if (error instanceof webhooks.InvalidSignatureError) {
-          console.log('invalid signature, look out!');
-        }
-      }
-    };
-    // check signature and if OK return an array of events
-    const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
-    //  if there is an array pass to event handler function*/
+  const eventsRequestBody = req.body;
+  // get signature from headers
+  const signatureHeader = req.headers['webhook-signature'];
 
+  // Handle the incoming Webhook and check its signature, this is from
+  // Gocardless docs.
+  const parseEvents = (
+    requestBody: any,
+    header: any, // From webhook header
+    // eslint-disable-next-line consistent-return
+  ) => {
+    try {
+      return webhooks.parse(requestBody, webhookEndpointSecret, header);
+    } catch (error) {
+      if (error instanceof webhooks.InvalidSignatureError) {
+        console.log('invalid signature, look out!');
+        res.sendStatus(498);
+      }
+    }
+  };
+
+  // check signature and if OK return an array of events
+  const eventsArray = parseEvents(eventsRequestBody, signatureHeader);
+  //  if there is an array pass to event handler function*/
+  if (eventsArray) {
     eventsArray.map(async (event: MandateType) => {
       if (webhookActionNames.has(event.action)) {
         await processEvents(event);
       }
     });
-    res.status(200);
-  } catch (err: any) {
-    const message = err.toString();
-    res.status(403).json({ message });
+    res.sendStatus(200);
   }
-  res.status(200).json({ message: 'webhook handler OK' });
+
+  // res.status(200).json({ message: 'webhook handler OK' });
 };
 export default goCardlessWebhookHandler;

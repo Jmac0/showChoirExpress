@@ -13,19 +13,38 @@ const mongoUri = config.get<string>('mongoUri');
 const password = config.get<string>('password');
 
 const app = createServer();
-// connect to DB,
-const DB = mongoUri.replace('<PASSWORD>', password) as string;
-mongoose.connect(DB, {}).then(() => {
-  console.log('DB connections successful');
-});
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log('Server Started On PORT', port);
 });
+// catch any unexpected synchronous errors
+process.on('uncaughtException', (err: { name: string; message: string }) => {
+  console.log(err.name, err.message);
 
-// will catch all unhandled async exceptions and errors //
+  console.log('UNHANDLED Exception 💥 App shutting down!');
+
+  process.exit(1);
+});
+// connect to DB,
+const DB = mongoUri.replace('<PASSWORD>', password) as string;
+mongoose
+  .connect(DB, {})
+  .then(() => {
+    console.log('DB connections successful');
+  })
+  .catch((err) => {
+    console.log('DB connection error', err.message);
+    server.close(() => {
+      process.exit(1);
+    });
+  });
+
+// catch all unhandled async exceptions and errors outside express
 process.on('unhandledRejection', (err: { name: string; message: string }) => {
   console.log(err.name, err.message);
 
-  console.log('UNHANDLED REJECTION 💥 Shutting down');
+  console.log('UNHANDLED REJECTION 💥 App shutting down!');
+  server.close(() => {
+    process.exit(1);
+  });
 });

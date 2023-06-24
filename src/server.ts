@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import AppError from '../utils/appError';
+import AppError from './utils/appError';
 import globalErrorHandler from './controllers/errorController';
 
 const mongoSanitize = require('express-mongo-sanitize');

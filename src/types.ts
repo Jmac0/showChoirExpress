@@ -14,6 +14,17 @@ export type MandateType = {
     description: string;
   };
 };
+
+export type WebhookTestBodyType = {
+  events: Array<{
+    action: string;
+    links: {
+      customer: string;
+      mandate: string;
+    };
+  }>;
+};
+
 export type MemberType = {
   direct_debit_started?: string;
   direct_debit_cancelled?: string;

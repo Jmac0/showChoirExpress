@@ -1,18 +1,25 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import config from 'config';
 
 import Member from '../models/member';
+
+import AppError from '../utils/appError';
 
 const gocardless = require('gocardless-nodejs');
 const constants = require('gocardless-nodejs/constants');
 
 const gocardlessAccessToken = config.get('goCardlessAccessToken');
+
 const client = gocardless(
   gocardlessAccessToken,
   constants.Environments.Sandbox,
 );
 // eslint-disable-next-line consistent-return
-const goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
+const goCardlessMandateFlowHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const {
     firstName,
     lastName,
@@ -34,9 +41,9 @@ const goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   const pattern = /.ru$/;
   const match = parsedEmail.match(pattern);
   if (match) {
-    return res
-      .status(401)
-      .json({ message: 'Please use a valid UK, EU or US email address' });
+    return next(
+      new AppError('Please provide a valid UK, EU or US email address', 401),
+    );
   }
 
   const createMandateRequestURL = async () => {
@@ -93,13 +100,15 @@ const goCardlessMandateFlowHandler = async (req: Request, res: Response) => {
   await Member.create(newMemberData)
     .then(async () => createMandateRequestURL())
     .catch((err: any) => {
-      console.log('ERROR SAVING DOCUMENT', err);
+      throw new Error(`ERROR SAVING DOCUMENT  ${err}`);
 
-      return res.status(500).json({
-        message:
-          'Oops, there seems to be a problem, please try again'
-          + ' later or give us a call',
-      });
+      return next(
+        new AppError(
+          'Oops, there seems to be a problem, please try again later or give us a call',
+          500,
+        ),
+      );
     });
+  return null;
 };
 export default goCardlessMandateFlowHandler;
