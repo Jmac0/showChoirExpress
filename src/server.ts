@@ -60,7 +60,8 @@ function createServer() {
   app.use(globalErrorHandler);
   //  Return 200 for "/" route to fix AWS warning
   app.use('/', (req, res) => {
-    res.status(200).json({ message: 'Hello Peeps' });
+    res.status(200)
+      .json({ message: 'App running successfully' });
   });
   return app;
 }

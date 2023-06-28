@@ -7,4 +7,6 @@ export default {
   password: '',
   goCardlessAccessToken: '',
   goCardlessWebhookSecret: '',
+  cypherAlgorithm: '',
+  emailCypherSecret: '',
 };

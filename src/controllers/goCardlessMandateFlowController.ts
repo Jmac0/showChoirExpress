@@ -4,17 +4,16 @@ import config from 'config';
 import Member from '../models/member';
 
 import AppError from '../utils/appError';
+import { encryptEmail } from '../utils/encryptEmail';
 
 const gocardless = require('gocardless-nodejs');
 const constants = require('gocardless-nodejs/constants');
 
 const gocardlessAccessToken = config.get('goCardlessAccessToken');
-
 const client = gocardless(
   gocardlessAccessToken,
   constants.Environments.Sandbox,
 );
-// eslint-disable-next-line consistent-return
 const goCardlessMandateFlowHandler = async (
   req: Request,
   res: Response,
@@ -36,7 +35,8 @@ const goCardlessMandateFlowHandler = async (
     consent,
   } = req.body;
   // trim and lower case email to get over a mongo query problem
-  const parsedEmail = email.toLowerCase().trim();
+  const parsedEmail = email.toLowerCase()
+    .trim();
   // check for spam .ru emails
   const pattern = /.ru$/;
   const match = parsedEmail.match(pattern);
@@ -45,7 +45,10 @@ const goCardlessMandateFlowHandler = async (
       new AppError('Please provide a valid UK, EU or US email address', 401),
     );
   }
+  // hash email to use in query string
+  const hashedEmail = encryptEmail(parsedEmail);
 
+  // create a billing request returns a request id string
   const createMandateRequestURL = async () => {
     // create a billing request returns a request id string
     const { id } = await client.billingRequests.create({
@@ -55,8 +58,9 @@ const goCardlessMandateFlowHandler = async (
     });
     // add prefilled customer detail to the direct debit form
     const billingRequestFlow = await client.billingRequestFlows.create({
-      redirect_uri: 'https://www.google.com',
-      exit_uri: 'https://www.google.com',
+      // redirect customer to create account page with email in query string
+      redirect_uri: `https://www.google.com/?email=${hashedEmail}`,
+      exit_uri: 'https://www.google.com/',
       prefilled_customer: {
         given_name: firstName,
         family_name: lastName,
@@ -70,10 +74,17 @@ const goCardlessMandateFlowHandler = async (
       links: {
         billing_request: id,
       },
-    });
+    })
+      .catch((error: any) => next(
+        new AppError(
+          error.message,
+          error.code,
+        ),
+      ));
     // send the billingRequestFlow object containing the redirect url for
     // the hosted signup form
-    res.status(200).json(billingRequestFlow);
+    res.status(200)
+      .json(billingRequestFlow);
   };
   /* Create new customer object with all fields needed, even if blank,
    these will be populated, by the Gocardless webhook in another handler */
@@ -97,18 +108,14 @@ const goCardlessMandateFlowHandler = async (
 
   // this runs first adding new customer info to the database or updating
   // an existing customer
-  await Member.create(newMemberData)
+  await Member.findOneAndUpdate({ email: email }, newMemberData, { upsert: true })
     .then(async () => createMandateRequestURL())
-    .catch((err: any) => {
-      throw new Error(`ERROR SAVING DOCUMENT  ${err}`);
-
-      return next(
-        new AppError(
-          'Oops, there seems to be a problem, please try again later or give us a call',
-          500,
-        ),
-      );
-    });
+    .catch((err: any) => next(
+      new AppError(
+        err.message,
+        500,
+      ),
+    ));
   return null;
 };
 export default goCardlessMandateFlowHandler;

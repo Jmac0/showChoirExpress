@@ -19,7 +19,7 @@ export type WebhookTestBodyType = {
   events: Array<{
     action: string;
     links: {
-      customer: string;
+      customer?: string;
       mandate: string;
     };
   }>;

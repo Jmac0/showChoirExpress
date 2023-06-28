@@ -16,8 +16,8 @@ const client = gocardless(
 );
 
 // Set of actions to call processEvents with
-const webhookActionNames = new Set(['fulfilled', 'created']);
-
+const webhookActionNames = new Set(['fulfilled', 'created', 'cancelled']);
+// Process incoming webhooks and updates user based on event action
 const processEvents = async (event: MandateType) => {
   // date-fns date string
   const currentDate = format(new Date(), 'dd/MM/yyyy');
@@ -60,7 +60,10 @@ const processEvents = async (event: MandateType) => {
           active_mandate: true,
           go_cardless_id: customer.id,
         },
-      );
+      )
+        .catch((err) => {
+          throw new Error(err.message);
+        });
       break;
     }
     //* * handle canceled mandate **//
@@ -75,7 +78,7 @@ const processEvents = async (event: MandateType) => {
         const Id = mandate.links.customer;
         // // query Go Cardless for the actual customer details
         const canceledCustomer = await client.customers.find(Id);
-
+        // update customer record
         await Member.findOneAndUpdate(
           { email: `${canceledCustomer.email}` },
           {
@@ -84,9 +87,10 @@ const processEvents = async (event: MandateType) => {
             go_cardless_id: '',
             direct_debit_cancelled: currentDate,
           },
-        ).catch((err: any) => {
-          console.log(err);
-        });
+        )
+          .catch((err: any) => {
+            throw new Error(err.message);
+          });
       }
       break;
     }
@@ -112,7 +116,8 @@ const goCardlessWebhookHandler = async (req: Request, res: Response) => {
       return webhooks.parse(requestBody, webhookEndpointSecret, header);
     } catch (error) {
       if (error instanceof webhooks.InvalidSignatureError) {
-        console.log('invalid signature, look out!');
+        // eslint-disable-next-line no-console
+        console.warn('invalid signature, look out!');
         res.sendStatus(498);
       }
     }
