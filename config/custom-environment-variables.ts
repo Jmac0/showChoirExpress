@@ -12,4 +12,5 @@ export default {
   emailCypherSecret: 'EMAIL_CYPHER_SECRET',
   mockGoCardlessCustomer: 'MOCK_GO_CARDLESS_CUSTOMER',
   mockGoCardlessMandate: 'MOCK_GO_CARDLESS_MANDATE',
+  baseUrl: 'BASE_URL',
 };

@@ -9,4 +9,5 @@ export default {
   goCardlessWebhookSecret: '',
   mockGoCardlessCustomer: '',
   mockGoCardlessMandate: '',
+  baseUrl: '',
 };
