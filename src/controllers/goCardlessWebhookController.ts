@@ -20,7 +20,7 @@ const webhookActionNames = new Set(["fulfilled", "created", "cancelled"]);
 // Process incoming webhooks and updates user based on event action
 const processEvents = async (event: MandateType) => {
   // date-fns date string
-  const currentDate = format(new Date(), "dd/MM/yyyy");
+  const currentDate = format(new Date(), "dd/MM/yyyy").toString();
   // event action string from GoCardless webhook event
   switch (event.action) {
     case "created":
@@ -57,7 +57,9 @@ const processEvents = async (event: MandateType) => {
       await Member.findOneAndUpdate(
         { email: customer.email },
         {
+          date_joined: currentDate,
           active_mandate: true,
+          active_member: true,
           go_cardless_id: customer.id,
         }
       ).catch((err) => {

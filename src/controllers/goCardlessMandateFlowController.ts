@@ -95,6 +95,7 @@ const goCardlessMandateFlowHandler = async (
     home_choir: homeChoir,
     consent,
     active_mandate: false,
+    active_member: false,
     mandate: "",
     membership_type: "DD",
     go_cardless_id: "",

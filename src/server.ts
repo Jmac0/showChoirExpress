@@ -13,12 +13,12 @@ const goCardlessRouter = require("./routers/goCardlessRouter");
 
 // Set rate limiter //
 const limiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 60 minutes
-  max: 200, // limit each IP to 200 requests per
-  // hour
-  // windowMs
-  message: "Too many requests from this IP, please try again after an hour",
-});
+                            windowMs: 60 * 60 * 1000, // 60 minutes
+                            max: 200, // limit each IP to 200 requests per
+                            // hour
+                            // windowMs
+                            message: "Too many requests from this IP, please try again after an hour"
+                          });
 
 function createServer() {
   /// ////////////////////////////////////////////////////////////
@@ -30,8 +30,8 @@ function createServer() {
   app.use(mongoSanitize());
   app.use(
     hpp({
-      whitelist: [],
-    })
+          whitelist: []
+        })
   );
   // serve static files
   app.use(express.static(`${__dirname}/public`));
@@ -44,28 +44,6 @@ function createServer() {
     // morgan is a logger function
     app.use(morgan("dev"));
   }
-  app.use(
-    "/api/makewebhook",
-    express.text({ type: "application/json" }),
-    (req: Request, res: Response, next: NextFunction) => {
-      const mockFulfilledWebhookBody = {
-        events: [
-          {
-            action: "fulfilled",
-            links: {
-              customer: "CU000Y77RZJMNR",
-              mandate: "MD000TWG05DHXR",
-            },
-          },
-        ],
-      };
-      const { webhookSignature, webhookBody } = createWebhookSignature(
-        mockFulfilledWebhookBody
-      );
-      console.log(webhookBody);
-      res.status(200).json({ webhookSignature });
-    }
-  );
 
   app.use("/api/gocardless", goCardlessRouter);
   /// /////////////// Handle all undefined routes * /////////////////////
@@ -82,7 +60,8 @@ function createServer() {
   app.use(globalErrorHandler);
   //  Return 200 for "/" route to fix AWS warning
   app.use("/", (req, res) => {
-    res.status(200).json({ message: "App running successfully" });
+    res.status(200)
+       .json({ message: "App running successfully" });
   });
   return app;
 }
