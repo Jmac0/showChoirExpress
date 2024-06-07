@@ -3,7 +3,6 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import AppError from "./utils/appError";
 import globalErrorHandler from "./controllers/errorController";
-import { createWebhookSignature } from "./utils/createWebhookSignature";
 
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
@@ -13,12 +12,12 @@ const goCardlessRouter = require("./routers/goCardlessRouter");
 
 // Set rate limiter //
 const limiter = rateLimit({
-                            windowMs: 60 * 60 * 1000, // 60 minutes
-                            max: 200, // limit each IP to 200 requests per
-                            // hour
-                            // windowMs
-                            message: "Too many requests from this IP, please try again after an hour"
-                          });
+  windowMs: 60 * 60 * 1000, // 60 minutes
+  max: 200, // limit each IP to 200 requests per
+  // hour
+  // windowMs
+  message: "Too many requests from this IP, please try again after an hour",
+});
 
 function createServer() {
   /// ////////////////////////////////////////////////////////////
@@ -30,8 +29,8 @@ function createServer() {
   app.use(mongoSanitize());
   app.use(
     hpp({
-          whitelist: []
-        })
+      whitelist: [],
+    })
   );
   // serve static files
   app.use(express.static(`${__dirname}/public`));
@@ -60,8 +59,7 @@ function createServer() {
   app.use(globalErrorHandler);
   //  Return 200 for "/" route to fix AWS warning
   app.use("/", (req, res) => {
-    res.status(200)
-       .json({ message: "App running successfully" });
+    res.status(200).json({ message: "App running successfully" });
   });
   return app;
 }

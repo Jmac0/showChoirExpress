@@ -46,7 +46,7 @@ const goCardlessMandateFlowHandler = async (
   }
   // hash email to use in query string
 
-  // create a billing request returns a request id string
+  // create a billing request, returns a request id string
   const createMandateRequestURL = async () => {
     // create a billing request returns a request id string
     const { id } = await client.billingRequests.create({
@@ -97,7 +97,7 @@ const goCardlessMandateFlowHandler = async (
     active_mandate: false,
     active_member: false,
     mandate: "",
-    membership_type: "DD",
+    membership_type: "Monthly",
     go_cardless_id: "",
   };
 
